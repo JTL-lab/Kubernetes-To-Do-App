@@ -4,6 +4,10 @@ metadata:
   name: flask-app
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: flask-app
@@ -14,6 +18,7 @@ spec:
     spec:
       containers:
       - name: flask-app
+        # Can update to new image version to test rolling update
         image: jtllab/flask-to-do-app:latest
         ports:
         - containerPort: 5000
