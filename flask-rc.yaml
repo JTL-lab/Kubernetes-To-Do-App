@@ -13,6 +13,6 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: username/flask-to-do-app:latest
+        image: jtllab/flask-to-do-app:latest
         ports:
         - containerPort: 5000
