@@ -120,6 +120,15 @@ def search():
 def about():
 	return render_template('credits.html',t=title,h=heading)
 
+# ADDED LINES: new routes for healthy and live states for monitoring
+@app.route("/health")
+def health():
+	return "Healthy", 200
+
+@app.route("/live")
+def live():
+	return "Alive", 200
+
 if __name__ == "__main__":
 	env = os.environ.get('FLASK_ENV', 'development')
 	port = int(os.environ.get('PORT', 5000))

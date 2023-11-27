@@ -22,3 +22,16 @@ spec:
         image: jtllab/flask-to-do-app:latest
         ports:
         - containerPort: 5000
+        # If liveness or readiness probes fail, Kubernetes restarts pod
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
