@@ -1,0 +1,4 @@
+# Custom
+.venv
+.vscode
+scrap*.md

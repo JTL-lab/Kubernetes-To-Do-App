@@ -85,10 +85,23 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
     ```
 
 ---
+## Python venv Instructions
+Run at the Project root folder.
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+pip3 install --upgrade pip
+```
+
+To deactivate the venv:
+```deactivate```
+
+---
 ## References
 ```
-- https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#expose
-- https://minikube.sigs.k8s.io/docs/handbook/accessing/
-- https://helm.sh/docs/helm/helm_install/
-- https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+- [kubectl cmds](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+- [minikube docs](https://minikube.sigs.k8s.io/docs/handbook/accessing/)
+- [helm install](https://helm.sh/docs/helm/helm_install/)
+- [prometheus k8 stack docs](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 ```
