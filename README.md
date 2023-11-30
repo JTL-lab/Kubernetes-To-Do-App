@@ -57,6 +57,15 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - kubectl get deployment prometheus-kube-prometheus-operator > prom-k8-oper.yml
 - kubectl get prometheusrules
 
+#### Getting the prometheus.yml file
+- kubectl get deployment prometheus-deployment -n monitoring -o yaml
+- kubectl get configmap prometheus-server-conf -n monitoring -o yaml
+- kubectl edit configmap prometheus-server-conf -n monitoring
+- kubectl delete configmap prometheus-server-conf -n monitoring
+- kubectl apply -f config-map.yml
+- kubectl get pods -n monitoring
+- kubectl logs prometheus-deployment-69c955b584-kp2wv -n monitoring
+
 #### K8 Dashboard
 - kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 
@@ -177,6 +186,7 @@ kubectl create -f alert-manager-service.yml
 
 [Gafana step-by-step guide AlertManager with Slack](https://grafana.com/blog/2020/02/25/step-by-step-guide-to-setting-up-prometheus-alertmanager-with-slack-pagerduty-and-gmail/)
 [TA resource - devopscube](https://devopscube.com/alert-manager-kubernetes-guide/)
+[Prometheus alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 
 ---
 ---
@@ -200,3 +210,6 @@ To deactivate the venv:
 - [prometheus k8 stack docs](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 - [TA link prometheus k8 tutorial](https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/)
 - [Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
+- [Slack - create incoming webhooks for alerts](https://api.slack.com/messaging/webhooks)
+
+---
