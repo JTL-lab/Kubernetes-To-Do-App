@@ -99,9 +99,7 @@ To deactivate the venv:
 
 ---
 ## References
-```
-- [kubectl cmds](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
-- [minikube docs](https://minikube.sigs.k8s.io/docs/handbook/accessing/)
-- [helm install](https://helm.sh/docs/helm/helm_install/)
-- [prometheus k8 stack docs](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
-```
+[kubectl cmds](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+[minikube docs](https://minikube.sigs.k8s.io/docs/handbook/accessing/)
+[helm install](https://helm.sh/docs/helm/helm_install/)
+[prometheus k8 stack docs](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
