@@ -154,19 +154,7 @@ kubectl get svc prometheus-service -n monitoring
 ### Kube State Metrics
 Kube State Metrics is a service that talks to the Kubernetes API server to get all the details about all the API objects like deployments, pods, daemonsets, Statefulsets, etc. It provides kubernetes objects & resources metrics that you cannot get directly from native Kubernetes monitoring components.
 
-Kube State Metrics Config files are found in the folder: kube-state-metrics
-
 [Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
-
-Steps
-1. Create all the objects in the directory
-```
-kubectl apply -f kube-state-metrics/
-```
-2. Confirm the deployment status
-```
-kubectl get deployments kube-state-metrics -n kube-system
-```
 
 ### Setting Up Kubernetes Alert Manager with the Prometheus Monitoring System
 Alert Manager files are found in the folder: alert-manager
