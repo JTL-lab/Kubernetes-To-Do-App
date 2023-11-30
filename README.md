@@ -52,14 +52,19 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - kubectl get crd
 - kubectl get statefulset
 - kubectl describe statefulset prometheus-prometheus-kube-prometheus-prometheus > prom-statefulset.yml
-- kubectl get deployment 
+- kubectl get deployment
+- kubectl get deployment prometheus-kube-prometheus-operator -o yaml
+- kubectl get deployment prometheus-kube-prometheus-operator > prom-k8-oper.yml
+- kubectl get prometheusrules
 
 #### K8 Dashboard
 - kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 
-
 ---
-## Part 8: Instructions for Alerting
+---
+# Part 8: Alerting
+
+## Part 8: Instructions for Alerting (Cluster Monitoring from all K8 components)
 1. First ensure that there are no resources on the pod.
    ```
    kubectl get pod
@@ -80,10 +85,100 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 5. Get the deployment YAML config file
     ```
     kubectl get deployment
-    kubectl get deployment prometheus-kube-prometheus-operator -o yaml
-    kubectl get deployment flask-app -o yaml
+    kubectl describe deployment prometheus-kube-prometheus-operator > describe-prom-oper.yml
+    kubectl get deployment prometheus-kube-prometheus-operator > prom-k8-oper.yml
+    kubectl get deployment flask-app > prom-todoapp.yml
     ```
 
+6. Install [kube-state-metrics](https://kubernetes.github.io/kube-state-metrics/) as a Helm chart. [kube-state-metrics Helm Chart](https://artifacthub.io/packages/helm/bitnami/kube-state-metrics).
+7. Signup for a Grafana account.
+8. Signup for a Slack account. Create a Slack Channel. The Slack Channel will be the output channel to receive alerts from Prometheus based on triggered rules' conditions.
+
+## Part 8: Instructions for Alerting (from TA link)
+All files are located in folder: prometheus
+
+Steps
+1. Create a RBAC role for Prometheus to call K8 endpoints on the object.
+2. Create a Config Map between Prometheus and K8.
+3. Get the list of PrometheusRule resources in the cluster.
+4. Get further details of the rule.
+5. Create a Prometheus deployment file that uses the Prometheus Docker IMG.
+6. Check the created deployment.
+
+```
+kubectl create -f clusterRole.yml
+kubectl create -f config-map.yml
+kubectl create -f prometheus-deployment.yml 
+
+kubectl get prometheusrules
+kubectl describe prometheusrule prometheus-kube-prometheus-alertmanager.rules
+```
+
+### Connecting to the Prometheus Dashboard
+#### Method1: kubectl Port Forwarding (from local machine)
+1. Run the CMD: (replace with your <pod name>)
+    ```
+    kubectl get pods --namespace=monitoring
+    kubectl port-forward prometheus-deployment-5549c769cc-wxjlg 8080:9090 -n monitoring
+    ```
+2. Check the Prometheus Dashboard at: http://localhost:8080
+
+#### Method2: Expose Prometheus as a Kubernetes Service
+1. Create the prometheus-service.yml file. It will expose Prometheus on all kubernetes node IP’s on port 30000.
+2. Create the service by running:
+    ```
+    kubectl create -f prometheus-service.yml --namespace=monitoring
+    ```
+3. Once created, you can access the Prometheus dashboard using any of the Kubernetes node’s IP on port 30000. (ie: http://192.168.49.2:30000)
+```
+kubectl get nodes -o wide
+kubectl get svc prometheus-service -n monitoring
+```
+
+#### Files created:
+- clusterRole.yml
+- config-map.yml
+- prometheus-deployment.yml
+- prometheus-service.yml
+
+---
+### Kube State Metrics
+Kube State Metrics is a service that talks to the Kubernetes API server to get all the details about all the API objects like deployments, pods, daemonsets, Statefulsets, etc. It provides kubernetes objects & resources metrics that you cannot get directly from native Kubernetes monitoring components.
+
+Kube State Metrics Config files are found in the folder: kube-state-metrics
+
+[Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
+
+Steps
+1. Create all the objects in the directory
+```
+kubectl apply -f kube-state-metrics/
+```
+2. Confirm the deployment status
+```
+kubectl get deployments kube-state-metrics -n kube-system
+```
+
+### Setting Up Kubernetes Alert Manager with the Prometheus Monitoring System
+Alert Manager files are found in the folder: alert-manager
+
+Steps
+1. Create the config-map file for the AlertManager config file: alert-manager-config-map.yml
+2. Create the config-map file for the AlertManager Alert Template file: alert-template-config-map.yml
+3. Create a Deployment file: alert-manager-deployment.yml
+4. Create the Alert Manager Service Endpoint. Create the Service file: alert-manager-service.yml
+5. Run the CMDs to create the resources.
+```
+kubectl create -f alert-manager-config-map.yml
+kubectl create -f alert-template-config-map.yml
+kubectl create -f alert-manager-deployment.yml
+kubectl create -f alert-manager-service.yml
+```
+
+[Gafana step-by-step guide AlertManager with Slack](https://grafana.com/blog/2020/02/25/step-by-step-guide-to-setting-up-prometheus-alertmanager-with-slack-pagerduty-and-gmail/)
+[TA resource - devopscube](https://devopscube.com/alert-manager-kubernetes-guide/)
+
+---
 ---
 ## Python venv Instructions
 Run at the Project root folder.
@@ -100,6 +195,8 @@ To deactivate the venv:
 ---
 ## References
 - [kubectl cmds](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
-- [minikube docs](https://minikube.sigs.k8s.io/docs/handbook/accessing/)
+- [minikube docs](https://minikube.sigs.k8s.io/docs/start/)
 - [helm install](https://helm.sh/docs/helm/helm_install/)
 - [prometheus k8 stack docs](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
+- [TA link prometheus k8 tutorial](https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/)
+- [Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
