@@ -85,6 +85,7 @@ Debugging, Troubleshooting
 - kubectl delete service -n monitoring --all
 - kubectl delete daemonsets -n monitoring --all
 - kubectl delete pvc -n monitoring --all
+- kubectl rollout restart deployment prometheus-deployment -n monitoring
 
 Remove Prometheus resources created by prometheus-kube operator (from Helm)
 - kubectl delete prometheus --all -n default
@@ -93,6 +94,21 @@ Remove Prometheus resources created by prometheus-kube operator (from Helm)
 - kubectl get podmonitors -n default
 - kubectl delete servicemonitors --all -n default
 - kubectl delete podmonitors --all -n default
+
+#### Testing Part 8
+- kubectl get all
+- kubectl delete pod flask-app-6c799f94b7-7zppp
+- kubectl scale deployment flask-app --replicas=0
+
+Access the Prometheus UI
+kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring  
+http://localhost:9090
+
+Access the AlertManager
+kubectl port-forward svc/alertmanager 9093:9093 -n monitoring
+http://localhost:9093
+
+
 
 [kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 

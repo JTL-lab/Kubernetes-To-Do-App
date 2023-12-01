@@ -19,6 +19,14 @@ data:
           summary: Instance is down
           title: 'Instance {{ $labels.instance }} down'
           description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
+      - alert: DeploymentReplicasUnavailable
+        expr: kube_deployment_status_replicas_available{namespace="your-flask-app-namespace", deployment="flask-app"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Deployment replicas unavailable"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has no available replicas."
 
     - name: kubernetes-probes
       rules:
@@ -141,6 +149,9 @@ data:
           regex: (.+)
           target_label: __metrics_path__
           replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+      - job_name: 'kubernetes-services'
+        kubernetes_sd_configs:
+        - role: service
       - job_name: 'kubernetes-service-endpoints'
         kubernetes_sd_configs:
         - role: endpoints
