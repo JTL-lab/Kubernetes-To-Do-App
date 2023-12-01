@@ -1,12 +1,34 @@
 # Kubernetes-To-Do-App
 Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Columbia University.
 
-## Commands
 ---
+## Testing Part 8
+Delete all the Previous Resources
+- kubectl get all -n monitoring
+- kubectl delete deployment -n monitoring --all
+- kubectl delete service -n monitoring --all
+
+Create the new Instances
+- kubectl apply -f prometheus/
+- kubectl rollout restart deployment prometheus-deployment -n monitoring
+
+Trigger the failure
+- kubectl scale deployment flask-app --replicas=0
+
+Access Prometheus UI
+kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring
+[Prometheus UI](http://localhost:9090)
+
+Access AlertManager
+kubectl port-forward svc/alertmanager 9093:9093 -n monitoring
+[AlertManager UI](http://localhost:9093)
+
+---
+---
+## Commands
+
 ### Docker Commands
 - docker version
-
-### Docker Image Commands
 - docker build -t [image] .
 - docker scout quickview
 - docker scout cves [image]
@@ -33,7 +55,6 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - docker tag your-local-image-name:tag yourdockerhubusername/your-image-name:tag
 - docker pull mongo
 
----
 ### Minikube CLI (only used for start/delete local K8 cluster)
 - minikube start --kubernetes-version=latest
 - minikube service flask-app-service --url
@@ -43,8 +64,6 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - minikube dashboard
 
 [minikube docs](https://minikube.sigs.k8s.io/docs/handbook/controls/)
-
----
 ### Kubectl Commands
 - kubectl get po -A
 - kubectl apply -f flask-to-do-app-deployment.yml
@@ -74,7 +93,7 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - kubectl get pods -l app=alertmanager -n monitoring
 - kubectl logs <alertmanager-pod-name> -n monitoring
 
-Debugging, Troubleshooting
+### Debugging, Troubleshooting
 - kubectl get deployments -n monitoring
 - kubectl get statefulsets -n monitoring
 - kubectl get pods -n monitoring --show-labels
@@ -87,7 +106,7 @@ Debugging, Troubleshooting
 - kubectl delete pvc -n monitoring --all
 - kubectl rollout restart deployment prometheus-deployment -n monitoring
 
-Remove Prometheus resources created by prometheus-kube operator (from Helm)
+### Remove Prometheus resources created by prometheus-kube operator (from Helm)
 - kubectl delete prometheus --all -n default
 - kubectl delete alertmanager --all -n default
 - kubectl get servicemonitors -n default
@@ -95,24 +114,7 @@ Remove Prometheus resources created by prometheus-kube operator (from Helm)
 - kubectl delete servicemonitors --all -n default
 - kubectl delete podmonitors --all -n default
 
-#### Testing Part 8
-- kubectl get all
-- kubectl delete pod flask-app-6c799f94b7-7zppp
-- kubectl scale deployment flask-app --replicas=0
-- kubectl apply -f prometheus/
-- kubectl rollout restart deployment prometheus-deployment -n monitoring
-
-Access the Prometheus UI
-kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring
-http://localhost:9090
-
-Access the AlertManager
-kubectl port-forward svc/alertmanager 9093:9093 -n monitoring
-http://localhost:9093
-
-[kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-
-#### Getting the prometheus.yml file
+### Getting the prometheus.yml file
 - kubectl get deployment prometheus-deployment -n monitoring -o yaml
 - kubectl get configmap prometheus-server-conf -n monitoring -o yaml
 - kubectl edit configmap prometheus-server-conf -n monitoring
@@ -121,14 +123,16 @@ http://localhost:9093
 - kubectl get pods -n monitoring
 - kubectl logs prometheus-deployment-69c955b584-kp2wv -n monitoring
 
-#### K8 Dashboard
+### K8 Dashboard
 - kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 
----
----
-# Part 8: Alerting
+[kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
-## Part 8: Instructions for Alerting (Cluster Monitoring from all K8 components)
+---
+---
+## Part 8: Alerting - Setup Instructions
+
+### Part 8: Instructions for Alerting (Cluster Monitoring from all K8 components)
 1. First ensure that there are no resources on the pod.
    ```
    kubectl get pod
@@ -153,12 +157,11 @@ http://localhost:9093
     kubectl get deployment prometheus-kube-prometheus-operator > prom-k8-oper.yml
     kubectl get deployment flask-app > prom-todoapp.yml
     ```
-
 6. Install [kube-state-metrics](https://kubernetes.github.io/kube-state-metrics/) as a Helm chart. [kube-state-metrics Helm Chart](https://artifacthub.io/packages/helm/bitnami/kube-state-metrics).
-7. Signup for a Grafana account.
+7. Signup for a Grafana account. Connect Grafana with Prometheus.
 8. Signup for a Slack account. Create a Slack Channel. The Slack Channel will be the output channel to receive alerts from Prometheus based on triggered rules' conditions.
 
-## Part 8: Instructions for Alerting (from TA link)
+### Part 8: Instructions for Alerting (from TA link)
 All files are located in folder: prometheus
 
 Steps
@@ -166,7 +169,7 @@ Steps
 2. Create a Config Map between Prometheus and K8.
 3. Get the list of PrometheusRule resources in the cluster.
 4. Get further details of the rule.
-5. Create a Prometheus deployment file that uses the Prometheus Docker IMG.
+5. Create a Prometheus deployment file.
 6. Check the created deployment.
 
 ```
@@ -200,14 +203,14 @@ kubectl get nodes -o wide
 kubectl get svc prometheus-service -n monitoring
 ```
 
-#### Files created:
+Files created:
 - clusterRole.yml
 - config-map.yml
 - prometheus-deployment.yml
 - prometheus-service.yml
 
 ---
-### Kube State Metrics
+#### Kube State Metrics
 Kube State Metrics is a service that talks to the Kubernetes API server to get all the details about all the API objects like deployments, pods, daemonsets, Statefulsets, etc. It provides kubernetes objects & resources metrics that you cannot get directly from native Kubernetes monitoring components.
 
 [Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
@@ -215,24 +218,7 @@ Kube State Metrics is a service that talks to the Kubernetes API server to get a
 kubectl get pods -n monitoring -l k8s-app=kube-state-metrics
 kubectl get svc -n monitoring kube-state-metrics
 
-### Setting Up Kubernetes Alert Manager with the Prometheus Monitoring System
-Alert Manager files are found in the folder: alert-manager
-
-Steps
-1. Create the config-map file for the AlertManager config file: alert-manager-config-map.yml
-2. Create the config-map file for the AlertManager Alert Template file: alert-template-config-map.yml
-3. Create a Deployment file: alert-manager-deployment.yml
-4. Create the Alert Manager Service Endpoint. Create the Service file: alert-manager-service.yml
-5. Run the CMDs to create the resources.
-```
-kubectl create -f alert-manager-config-map.yml
-kubectl create -f alert-template-config-map.yml
-kubectl create -f alert-manager-deployment.yml
-kubectl create -f alert-manager-service.yml
-kubectl apply -f alert-manager/
-```
-
-### Grafana
+#### Grafana
 - kubectl port-forward service/grafana 3000:3000 -n monitoring
 - kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana -n monitoring
 - minikube service grafana --url -n monitoring
@@ -245,7 +231,6 @@ pass: 6998a1
 [TA resource - devopscube](https://devopscube.com/alert-manager-kubernetes-guide/)
 [Prometheus alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 
----
 ---
 ## Python venv Instructions
 Run at the Project root folder.
