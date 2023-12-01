@@ -99,16 +99,16 @@ Remove Prometheus resources created by prometheus-kube operator (from Helm)
 - kubectl get all
 - kubectl delete pod flask-app-6c799f94b7-7zppp
 - kubectl scale deployment flask-app --replicas=0
+- kubectl apply -f prometheus/
+- kubectl rollout restart deployment prometheus-deployment -n monitoring
 
 Access the Prometheus UI
-kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring  
+kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring
 http://localhost:9090
 
 Access the AlertManager
 kubectl port-forward svc/alertmanager 9093:9093 -n monitoring
 http://localhost:9093
-
-
 
 [kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
@@ -212,6 +212,9 @@ Kube State Metrics is a service that talks to the Kubernetes API server to get a
 
 [Kube State Metrics](https://devopscube.com/setup-kube-state-metrics/)
 
+kubectl get pods -n monitoring -l k8s-app=kube-state-metrics
+kubectl get svc -n monitoring kube-state-metrics
+
 ### Setting Up Kubernetes Alert Manager with the Prometheus Monitoring System
 Alert Manager files are found in the folder: alert-manager
 
@@ -234,7 +237,7 @@ kubectl apply -f alert-manager/
 - kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana -n monitoring
 - minikube service grafana --url -n monitoring
 
-Access the dashboard at [local](http://127.0.0.1:49182)
+Access the dashboard at [local](http://127.0.0.1:51918/?orgId=1)
 user: admin
 pass: 6998a1
 

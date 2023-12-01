@@ -83,4 +83,37 @@ spec:
           items:
             - key: datasource.yaml
               path: datasource.yaml
-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+  labels:
+    k8s-app: kube-state-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-state-metrics
+    spec:
+      serviceAccountName: kube-state-metrics
+      containers:
+      - name: kube-state-metrics
+        image: k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.0.0
+        ports:
+        - name: http-metrics
+          containerPort: 8080
+        - name: telemetry
+          containerPort: 8081
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 100m
+          requests:
+            memory: 100Mi
+            cpu: 100m

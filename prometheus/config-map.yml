@@ -20,7 +20,7 @@ data:
           title: 'Instance {{ $labels.instance }} down'
           description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
       - alert: DeploymentReplicasUnavailable
-        expr: kube_deployment_status_replicas_available{namespace="your-flask-app-namespace", deployment="flask-app"} == 0
+        expr: kube_deployment_status_replicas_available{namespace="default", deployment="flask-app"} == 0
         for: 5m
         labels:
           severity: critical
