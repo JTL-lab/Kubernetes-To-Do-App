@@ -14,6 +14,7 @@ Create the new Instances
 
 Trigger the failure
 - kubectl scale deployment flask-app --replicas=0
+- kubectl delete deployment flask-app-<id>
 
 Access Prometheus UI [Prometheus UI](http://localhost:9090)
 - kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring
