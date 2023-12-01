@@ -34,9 +34,15 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - docker pull mongo
 
 ---
-### Minikube Commands - To setup local K8 cluster
-- minikube start
+### Minikube CLI (only used for start/delete local K8 cluster)
+- minikube start --kubernetes-version=latest
 - minikube service flask-app-service --url
+- minikube stop
+- minikube delete
+- minikube delete --all
+- minikube dashboard
+
+[minikube docs](https://minikube.sigs.k8s.io/docs/handbook/controls/)
 
 ---
 ### Kubectl Commands
@@ -45,8 +51,9 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - kubectl apply -f mongodb-deployment.yml
 - kubectl expose -f flask-to-do-app-service.yml
 - kubectl expose -f mongodb-service.yml
-- kubectl get pod
 - kubectl get all
+- kubectl get pods --sort-by='.status.containerStatuses[0].restartCount'
+- kubectl get services --sort-by=.metadata.name
 - kubectl get configmap
 - kubectl get secret
 - kubectl get crd
@@ -56,6 +63,38 @@ Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Colu
 - kubectl get deployment prometheus-kube-prometheus-operator -o yaml
 - kubectl get deployment prometheus-kube-prometheus-operator > prom-k8-oper.yml
 - kubectl get prometheusrules
+- kubectl -n monitoring delete pod,svc --all
+- kubectl expose deployment prometheus-kube-prometheus-operator --type=NodePort --port=8080
+- kubectl apply -f alert-manager-config-map.yml
+- kubectl delete pods -l app=alertmanager -n monitoring
+- kubectl delete pods --all -n monitoring
+- kubectl delete pods --all -A
+- kubectl delete all --all -n monitoring
+- kubectl delete all --all -A
+- kubectl get pods -l app=alertmanager -n monitoring
+- kubectl logs <alertmanager-pod-name> -n monitoring
+
+Debugging, Troubleshooting
+- kubectl get deployments -n monitoring
+- kubectl get statefulsets -n monitoring
+- kubectl get pods -n monitoring --show-labels
+- kubectl get all -n monitoring
+- kubectl get services -n monitoring
+- kubectl get events -n monitoring
+- kubectl delete deployment -n monitoring --all
+- kubectl delete service -n monitoring --all
+- kubectl delete daemonsets -n monitoring --all
+- kubectl delete pvc -n monitoring --all
+
+Remove Prometheus resources created by prometheus-kube operator (from Helm)
+- kubectl delete prometheus --all -n default
+- kubectl delete alertmanager --all -n default
+- kubectl get servicemonitors -n default
+- kubectl get podmonitors -n default
+- kubectl delete servicemonitors --all -n default
+- kubectl delete podmonitors --all -n default
+
+[kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 #### Getting the prometheus.yml file
 - kubectl get deployment prometheus-deployment -n monitoring -o yaml
@@ -117,7 +156,8 @@ Steps
 ```
 kubectl create -f clusterRole.yml
 kubectl create -f config-map.yml
-kubectl create -f prometheus-deployment.yml 
+kubectl create -f prometheus-deployment.yml
+kubectl apply -f prometheus/
 
 kubectl get prometheusrules
 kubectl describe prometheusrule prometheus-kube-prometheus-alertmanager.rules
@@ -170,9 +210,19 @@ kubectl create -f alert-manager-config-map.yml
 kubectl create -f alert-template-config-map.yml
 kubectl create -f alert-manager-deployment.yml
 kubectl create -f alert-manager-service.yml
+kubectl apply -f alert-manager/
 ```
 
-[Gafana step-by-step guide AlertManager with Slack](https://grafana.com/blog/2020/02/25/step-by-step-guide-to-setting-up-prometheus-alertmanager-with-slack-pagerduty-and-gmail/)
+### Grafana
+- kubectl port-forward service/grafana 3000:3000 -n monitoring
+- kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana -n monitoring
+- minikube service grafana --url -n monitoring
+
+Access the dashboard at [local](http://127.0.0.1:49182)
+user: admin
+pass: 6998a1
+
+[Grafana step-by-step guide AlertManager with Slack](https://grafana.com/blog/2020/02/25/step-by-step-guide-to-setting-up-prometheus-alertmanager-with-slack-pagerduty-and-gmail/)
 [TA resource - devopscube](https://devopscube.com/alert-manager-kubernetes-guide/)
 [Prometheus alert rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
 
