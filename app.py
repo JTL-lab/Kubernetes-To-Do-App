@@ -1,8 +1,11 @@
-from flask import Flask, render_template,request,redirect,url_for,g # For flask implementation
+from flask import Flask, render_template,request,redirect,url_for # For flask implementation
 from pymongo import MongoClient # Database connector
 from bson.objectid import ObjectId # For ObjectId to work
 from bson.errors import InvalidId # For catching InvalidId exception for ObjectId
 import os
+
+# Global variable for crash state
+is_crashed = False
 
 mongodb_host = os.environ.get('MONGO_HOST', 'mongodb-service')
 mongodb_port = int(os.environ.get('MONGO_PORT', '27017'))
@@ -123,21 +126,24 @@ def about():
 # ADDED LINES: new routes for healthy and live states for monitoring, failure testing
 @app.route("/health")
 def health():
-	if g.crashed:
-		return "Unhealthy", 500
-	return "Healthy", 200
+    global is_crashed
+    if is_crashed:
+        return "Unhealthy", 500
+    return "Healthy", 200
 
 @app.route("/live")
 def live():
-	if g.crashed:
-		return "Dead", 500
-	return "Alive", 200
+    global is_crashed
+    if is_crashed:
+        return "Dead", 500
+    return "Alive", 200
 
-# ADDED: Crash testing
-@app.route("/crashed")
-def crashed():
-	g.crashed = True
-	return "Crashed", 200
+# Endpoint to simulate crash
+@app.route("/crash")
+def crash():
+    global is_crashed
+    is_crashed = True
+    return "Crashed", 200
 
 
 if __name__ == "__main__":
