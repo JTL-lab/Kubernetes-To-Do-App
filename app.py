@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,redirect,url_for # For flask implementation
+from flask import Flask, render_template,request,redirect,url_for,g # For flask implementation
 from pymongo import MongoClient # Database connector
 from bson.objectid import ObjectId # For ObjectId to work
 from bson.errors import InvalidId # For catching InvalidId exception for ObjectId
@@ -120,14 +120,25 @@ def search():
 def about():
 	return render_template('credits.html',t=title,h=heading)
 
-# ADDED LINES: new routes for healthy and live states for monitoring
+# ADDED LINES: new routes for healthy and live states for monitoring, failure testing
 @app.route("/health")
 def health():
+	if g.crashed:
+		return "Unhealthy", 500
 	return "Healthy", 200
 
 @app.route("/live")
 def live():
+	if g.crashed:
+		return "Dead", 500
 	return "Alive", 200
+
+# ADDED: Crash testing
+@app.route("/crashed")
+def crashed():
+	g.crash = True
+	return "Crashed", 200
+
 
 if __name__ == "__main__":
 	env = os.environ.get('FLASK_ENV', 'development')
