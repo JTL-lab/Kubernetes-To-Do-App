@@ -136,7 +136,7 @@ def live():
 # ADDED: Crash testing
 @app.route("/crashed")
 def crashed():
-	g.crash = True
+	g.crashed = True
 	return "Crashed", 200
 
 
