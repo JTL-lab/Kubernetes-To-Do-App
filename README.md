@@ -2,7 +2,193 @@
 Assignment 3 (Kubernetes/Docker) for Big Data and Cloud Computing course at Columbia University.
 
 ---
+## Commands
+### Part 2: Containerizing the Application using Docker
+Link to image on Docker Hub: https://hub.docker.com/r/jtllab/flask-to-do-app
+
+Build the docker image and verify the image was created: 
+```
+docker build -t to-do-app .
+docker images
+```
+
+Deploy using Docker compose and verify containers are running: 
+```
+docker-compose up -d
+docker ps
+```
+
+Command to rebuild: 
+```
+docker-compose build
+```
+
+Pushing the image to Dockerhub: 
+```
+docker tag flask-to-do-app jtllab:flask-to-do-app:latest
+docker push jtllab/flask-to-do-app:latest
+```
+
+---
+
+To delete Docker containers: 
+```
+docker stop <container_id>
+docker rm <container_id> 
+```
+
+To delete one image after containers deleted: 
+```
+docker rmi <image_id>
+```
+
+To delete all images after containers deleted:
+```
+docker rmi $(docker images -q) -f
+```
+### Part 3: Deploying the Application on Minikube
+Start minikube: 
+```
+minikube start
+```
+
+Commands to deploy Flask and MongoDB, plus associated services:
+```
+kubectl apply -f flask-to-do-app-deployment.yml
+kubectl apply -f mongodb-deployment.yml
+kubectl apply -f flask-to-do-app-service.yml
+kubectl apply -f mongodb-service.yml
+```
+
+Verify everything is up: 
+```
+kubectl get deployments
+kubectl get services
+```
+
+Get URL of deployed application to verify it is running correctly on Minikube:
+```
+minikube service flask-app-service --url
+```
+---
+To delete all Kubernetes pods and resources: 
+```
+kubectl delete services --all --all-namespaces
+kubectl delete pods --all --all-namespaces
+```
+### Part 4: Deploying the Application on AWS EKS
+Deploy EKS cluster using AWS CLI: 
+```
+eksctl create cluster --name to-do-eks-cluster --version 1.24 --region us-east-1 --nodegroup-name my-nodes --node-type t3.small --nodes-min 1 --nodes-max 2 --managed
+```
+
+Note: Wait for both Cloudformation stacks (for the EKS cluster and its associated nodes, respectively) to successfully create all resources (cluster, nodes, VPC setup, etc.) before proceeding.
+
+Update Minikube config to ensure it has permission to access the newly created EKS cluster (should be done automatically, but running this command guarantees it):
+```
+aws eks --region us-east-1 update-kubeconfig --name to-do-eks-cluster
+```
+
+Deploy Flask app, MongoDB, and associated services again:
+```
+kubectl apply -f flask-to-do-app-deployment.yml
+kubectl apply -f mongodb-deployment.yml
+kubectl apply -f flask-to-do-app-service.yml
+kubectl apply -f mongodb-service.yml
+```
+
+Verify everything is up: 
+```
+kubectl get deployments
+kubectl get services
+```
+
+Get URL for the application running in EKS: 
+```
+kubectl get service flask-app-service
+```
+
+You can use the URL returned with port 5000 in a browser to verify the application is running in the cloud!
+
+### Part 5: Replication controller feature
+Set up replication controller: 
+```
+kubectl apply -f flask-rc.yaml 
+```
+
+List pods: 
+```
+kubectl get pods
+```
+
+Verify that replication controller is working by deleting a pod (another will be automatically created to maintain number of replicas afterwards):
+```
+kubectl delete pod [POD_NAME]
+```
+### Part 6: Rolling update strategy
+- Created another image for the to-do app, ``jtllab/flask-to-do-app:v2``, and uploaded to DockerHub. 
+- Redeployed new image with rolling update strategy and confirmed successful update. 
+
+Relevant commands: 
+1) To update image to new version (e.g. ``v2``)
+```
+kubectl set image deployment/flask-app flask-app=jtllab/flask-to-do-app:v2
+```
+2) Check rollout status
+```
+kubectl rollout status deployment/flask-app
+```
+3) Confirm that pod replicas are running correct version
+```
+kubectl describe pod [POD_NAME]
+```
+### Part 7: Health monitoring
+- Configured a livenessProbe and readinessProb to verify that i) pod is alive and healthy and ii) pod is ready to receive traffic. 
+- Added /health and /live endpoints to app.py for probes that return status code 200. 
+- Configured Kubernetes to restart the pod if a probe fails. 
+- Added /crash endpoint to test pod failure.
+
+Verify probes are returning status code 200 while pod is healthy and live: 
+```
+kubectl logs [DEPLOYED APP ID]
+```
+
+Trigger the /crash endpoint and verify that probes work to restart the pod: 
+```
+url=$(minikube service flask-app-service --url)
+curl "${url}/crash"
+```
+### Part 8: Prometheus Health Alerting
+Set up namespace for monitoring: 
+```
+kubectl create namespace monitoring
+```
+
+Create all Prometheus related resources in monitoring namespace: 
+```
+kubectl apply -f prometheus/
+```
+
+Verify that everything deployed successfully: 
+```
+kubectl get deployments -n monitoring
+kubectl get services -n monitoring
+```
+
+Get endpoint url and test application crash to verify that notification sends: 
+```
+url=$(minikube service flask-app-service --url)
+curl "${url}/crash"
+```
+
+Check that a pod restarted (may need to wait a few seconds and recheck, sometimes takes a bit to update): 
+```
+kubectl get pods
+```
+
 ## Testing Part 8
+
+---
 Delete all the Previous Resources
 - kubectl get all -n monitoring
 - kubectl delete deployment -n monitoring --all
@@ -23,8 +209,8 @@ Access AlertManager [AlertManager UI](http://localhost:9093)
 - kubectl port-forward svc/alertmanager 9093:9093 -n monitoring
 
 ---
----
-## Commands
+
+## General Commands
 
 ### Docker Commands
 - docker version
@@ -55,6 +241,7 @@ Access AlertManager [AlertManager UI](http://localhost:9093)
 - docker pull mongo
 
 ### Minikube CLI (only used for start/delete local K8 cluster)
+[Minikube Documentation](https://minikube.sigs.k8s.io/docs/handbook/controls/)
 - minikube start --kubernetes-version=latest
 - minikube service flask-app-service --url
 - minikube stop
@@ -62,7 +249,6 @@ Access AlertManager [AlertManager UI](http://localhost:9093)
 - minikube delete --all
 - minikube dashboard
 
-[minikube docs](https://minikube.sigs.k8s.io/docs/handbook/controls/)
 ### Kubectl Commands
 - kubectl get po -A
 - kubectl apply -f flask-to-do-app-deployment.yml
